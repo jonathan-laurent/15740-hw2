@@ -10,11 +10,11 @@
  *
  * @return The old value stored at the dst address.
  */
-.globl atomic_increment
+.global atomic_increment
 atomic_increment:
-	movl %esi, %eax
-	xaddl %eax, (%rdi)
-	retq
+    movl %esi, %eax
+    xaddl %eax, (%rdi)
+    retq
 
 /**
  * @brief Atomically swap a value into a memory location and read the
@@ -26,9 +26,11 @@ atomic_increment:
  * @note On Entry:
  *       %rdi - Contains first argument: dst
  *       %rsi - Contains second argument: val
+ *
+ * @return The old value at the specified memory location.
  */
-.globl atomic_swap
+.global atomic_swap
 atomic_swap:
-	movl %esi, %eax
-	xchgl %eax, (%rdi)
-	retq
+    movl %esi, %eax
+    xchgl %eax, (%rdi)
+    retq

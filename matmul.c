@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include "atomic.h"
 
 /** @brief The number of threads to use to compute the matrix multiplication */
 #define THREADS 10
@@ -60,5 +61,8 @@ int get_block(coord_t *loc) {
 }
 
 int main(int argc, char *argv[]) {
-	return 0;
+	int x = 5;
+	atomic_increment(&x, 10);
+	printf("The value of x is %d\n", x);
+    return 0;
 }
