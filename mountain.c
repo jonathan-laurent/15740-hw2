@@ -10,11 +10,13 @@
 #define CLOCK_ID      CLOCK_PROCESS_CPUTIME_ID //CLOCK_REALTIME
 
 #define LOGALIGN      26     // Align &data on a multiple of 64MB
-#define TOLERANCE     1e-3   // Precision of time measurements
+#define TOLERANCE     1e-5   // Precision of time measurements
 #define STRIDE_MIN    1
-#define STRIDE_MAX    64
-#define LOGSIZE_MIN   8      // Should be at least sizeof(uint64_t)
-#define LOGSIZE_MAX   26
+#define STRIDE_MAX    32
+#define LOGSIZE_MIN   10     // Should be at least sizeof(uint64_t)
+#define LOGSIZE_MAX   30
+
+typedef double data_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,16 +57,16 @@ double func_time(test_funct f, double tolerance) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uint64_t *data;     // Data (has to be large enough)
+data_t *data;     // Data (has to be large enough)
 long size_param;    // Size of the array (in Bytes)
 long stride_param;  // Stride (in words of 8 Bytes)
 
 // Loads size/stride bytes of memory
 void test_simple() {
-  long n = size_param / sizeof(uint64_t);
+  long n = size_param / sizeof(data_t);
   long stride = stride_param;
-  uint64_t result = 0;
-  volatile uint64_t sink;
+  data_t result = 0;
+  volatile data_t sink;
   for (long i = 0; i < n; i += stride) {
     result += data[i];
   }
@@ -77,16 +79,16 @@ void test_better() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uint64_t *dummy;
+data_t *dummy;
 long dummy_len;
 
 void allocate_dummy(long size) {
   posix_memalign((void**) &dummy, 1 << LOGALIGN, size);
-  dummy_len = size / sizeof(uint64_t);
+  dummy_len = size / sizeof(data_t);
 }
 
 void purge_caches() {
-  volatile uint64_t x = 0;
+  volatile data_t x = 0;
   for(long i = 0; i < dummy_len; i++) {
     x += dummy[i];
   }
@@ -148,6 +150,8 @@ int main (int argc, char *argv[]) {
     fprintf(stderr, "%s\n", arg_error);
     return 1;
   }
+
+  fprintf(stderr, "Size of data_t: %luB\n", sizeof(data_t));
 
   init_delta();
   take_measurements(simple);

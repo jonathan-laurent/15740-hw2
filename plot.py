@@ -27,5 +27,5 @@ if __name__ == "__main__":
     ax.set_zlabel("MB/s")
     #plt.tight_layout()
 
-    ax.plot_trisurf(x, y, z, cmap=cm.Blues_r)
+    ax.plot_trisurf(x, y, z, cmap="terrain")
     plt.savefig(args.out, dpi=300)
