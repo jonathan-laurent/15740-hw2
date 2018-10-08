@@ -8,6 +8,7 @@
 #define PURGE_CACHES  1
 #define PURGE_SIZE    (1 << 22) // 4MB
 #define CLOCK_ID      CLOCK_PROCESS_CPUTIME_ID //CLOCK_REALTIME
+#define MIN_REPEAT    512    // Repeat each experiment at least ... times
 
 #define LOGALIGN      26     // Align &data on a multiple of 64MB
 #define TOLERANCE     1e-5   // Precision of time measurements
@@ -43,7 +44,7 @@ double timespec_diff(timespec *start, timespec *end) {
 double func_time(test_funct f, double tolerance) {
   timespec start, end;
   double elapsed;
-  long n = 1;
+  long n = MIN_REPEAT;
   while(1) {
     clock_gettime(CLOCK_ID, &start);
     for(long i = 0; i < n; i++) { f(); }

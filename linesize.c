@@ -53,11 +53,12 @@ int main (int argc, char *argv[]) {
 
   init_data();
 
-  printf("sep  time    \n");
-  printf("---- ------\n");
+  printf("sep   Mops/s \n");
+  printf("----  ------\n");
   for(int n = LINE_MIN; n <= LINE_MAX; n *= 2) {
     double time = experiment(n);
-    printf("%-4d %5.2lf\n", n, time);
+    double freq = ((double) NITER) / (1e6 * time);
+    printf("%-4d  %5.1lf\n", n, freq);
   }
 
   return 0;

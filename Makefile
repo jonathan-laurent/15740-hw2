@@ -12,7 +12,7 @@ mountain: mountain.c
 
 mountain.png: mountain plot.py
 	./mountain simple > mountain.data
-	./plot.py mountain.data -o mountain.png
+	./plot.py mountain.data --sections -o mountain.png
 
 test: mountain.png
 	open mountain.png
