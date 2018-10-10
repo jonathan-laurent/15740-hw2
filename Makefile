@@ -1,3 +1,6 @@
+CC=gcc
+CFLAGS += -std=c99
+
 all: mountain cores linesize
 
 full: all mountain.png
@@ -17,7 +20,7 @@ mountain.png: mountain plot.py
 test: mountain.png
 	open mountain.png
 
-atmic.o: atomic.S
+atomic.o: atomic.S
 	$(AS) $(ASFLAGS) -c $< -o $@
 
 matmul.o: matmul.c
@@ -26,7 +29,15 @@ matmul.o: matmul.c
 matmul: matmul.o atomic.o
 	$(CC) matmul.o atomic.o -o $@ $(LDFLAGS)
 
+lock.o: lock.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+lock: lock.o atomic.o
+	$(CC) atomic.S lock.c -lrt -lpthread -std=c99 -o lock
+
+
 clean:
 	rm -rf mountain mountain.png *~ mountain.data
 	rm -rf linesize linesize.txt cores cores.txt
 	rm -rf atomic.o matmul.o matmul
+	rm -rf lock.o lock

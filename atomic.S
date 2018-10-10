@@ -13,6 +13,7 @@
 .global atomic_increment
 atomic_increment:
     movl %esi, %eax
+    lock
     xaddl %eax, (%rdi)
     retq
 
@@ -32,5 +33,6 @@ atomic_increment:
 .global atomic_swap
 atomic_swap:
     movl %esi, %eax
+    lock
     xchgl %eax, (%rdi)
     retq
