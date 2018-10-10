@@ -74,9 +74,6 @@ void test_simple() {
   sink = result; // So compiler does not optimize away the loop
 }
 
-void test_better() {
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +94,6 @@ void purge_caches() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
 void take_measurements(int simple_mode) {
 
   test_funct test;
@@ -105,7 +101,7 @@ void take_measurements(int simple_mode) {
     test = test_simple;
   }
   else {
-    test = test_better;
+    test = test_simple;
   }
 
   long data_size = 1 << LOGSIZE_MAX;
