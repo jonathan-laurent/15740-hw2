@@ -5,6 +5,14 @@
 #include <semaphore.h>
 #include <assert.h>
 #include "atomic.h"
+#include "func_time.h"
+
+static void *(*incr_func)(void*);
+static pthread_t *threads;
+static sem_t sem;
+static int n_threads;
+static int n_increments;
+static int n = 0;
 
 enum {
 	MODE_SEMAPHORE,
@@ -31,6 +39,18 @@ void *do_atomic(void *arg) {
 	args_t *args = arg;
     for (int i = 0; i < args->n_iters; i++) {
 		atomic_increment(args->n, 1);
+	}
+}
+
+void do_test(void) {
+	args_t args  = { .n = &n, .n_iters = n_increments, .sem = &sem };
+    n = 0;
+	for (int i = 0; i < n_threads; i++) {
+		pthread_create(&threads[i], NULL, incr_func, &args);
+	}
+
+	for (int i = 0; i < n_threads; i++) {
+		pthread_join(threads[i], NULL);
 	}
 }
 
@@ -66,6 +86,14 @@ int get_mode(int argc, char *argv[]) {
 	return MODE_ATOMIC;
 }
 
+inline int *get_index(int *addr, int cols, int r, int c) {
+	return addr + (cols * r) + c;
+}
+
+void print_2d_array(int *addr, int rows, int cols) {
+
+}
+
 /**
  * @brief Parses the command line arguments, runs the test using the
  * specified parameters, and logs the results.
@@ -76,10 +104,7 @@ int get_mode(int argc, char *argv[]) {
  * @return Zero on success or negative error code on failure.s
  */
 int main(int argc, char *argv[]) {
-	int n_threads;
-	int n_increments;
 	int mode;
-	void *(*incr_func)(void*);
 
 	if (argc < 2) {
 		print_usage(argv);
@@ -89,30 +114,20 @@ int main(int argc, char *argv[]) {
 	n_threads = atoi(argv[1]);
 	n_increments = (1 << 20) / n_threads;
 	mode = get_mode(argc, argv);
+	incr_func = (mode == MODE_SEMAPHORE) ? do_semaphore : do_atomic;
 
-	if (mode == MODE_SEMAPHORE) {
-		incr_func = do_semaphore;
-	} else {
-		incr_func = do_atomic;
-	}
-
-	int n = 0;
-	sem_t sem;
 	sem_init(&sem, 0, 1);
+	threads = malloc(n_threads * sizeof(pthread_t));
 
-	pthread_t *threads = malloc(n_threads * sizeof(pthread_t));
-	args_t args  = { .n = &n, .n_iters = n_increments, .sem = &sem };
+	double time = func_time(do_test, 0.001);
+    printf("Using %s with %d thread(s): time = %lfs\n",
+            mode == MODE_SEMAPHORE ? "semaphore" : "atomic operations",
+            n_threads, time);
 
-	for (int i = 0; i < n_threads; i++) {
-		pthread_create(&threads[i], NULL, incr_func, &args);
-	}
+	sem_destroy(&sem);
+	free(threads);
 
-	for (int i = 0; i < n_threads; i++) {
-		pthread_join(threads[i], NULL);
-	}
-
-	printf("n_threads * n_increments = %d, n = %d\n", n_threads * n_increments, n);
 	assert(n == n_threads * n_increments);
-	printf("Done! n = %d\n", n);
+
 	return 0;
 }
