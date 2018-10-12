@@ -15,6 +15,5 @@ cores.txt
 cores.xlsx
 races.c
 *.o
-*.pdf
 *~
 .gitignore
