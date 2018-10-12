@@ -2,15 +2,17 @@ CC=gcc
 CFLAGS = -std=gnu11
 LFLAGS = -lrt -lpthread
 
-all: mountain cores linesize
+all: mmt lock smt mountain cores linesize
 
 full: all mountain.png
 	./linesize > linesize.txt
 	./cores > cores.txt
 
 linesize: linesize.c
+	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@
 
 cores: cores.c
+	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@
 
 mountain: mountain.c
 
@@ -21,24 +23,18 @@ mountain.png: mountain plot.py
 test: mountain.png
 	open mountain.png
 
-atomic.o: atomic.S
-	$(AS) $(ASFLAGS) -c $< -o $@ $(LDFLAGS)
+mmt: func_time.c perf.c mmt.c atomic.S
+	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@
 
-matmul.o: matmul.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+lock: lock.c atomic.S func_time.c perf.c
+	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@
 
-matmul: matmul.o atomic.o
-	$(CC) $(CFLAGS) func_time.c perf.c matmul.o atomic.o -o $@ $(LFLAGS)
-
-lock.o: lock.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-lock: lock.o atomic.o
-	$(CC) atomic.S lock.c func_time.c perf.c $(CFLAGS) $(LFLAGS) -o lock
-
+smt: smt.c func_time.c perf.c
+	$(CC) $(CFLAGS) $(LFLAGS) -D_GNU_SOURCE $^ -o $@
 
 clean:
 	rm -rf mountain mountain.png *~ mountain.data
 	rm -rf linesize linesize.txt cores cores.txt
-	rm -rf atomic.o matmul.o matmul
-	rm -rf lock.o lock
+	rm -rf mmt
+	rm -rf lock
+	rm -rf smt
