@@ -2,7 +2,12 @@ CC=gcc
 CFLAGS = -std=gnu11
 LFLAGS = -lrt -lpthread
 
+HANDINFILES = writeup.pdf Makefile mountain.c cores.c linesize.c smt.c lock.c mmt.c
+
 all: mmt lock smt mountain cores linesize
+
+submit:
+	tar cvf submission.tar.gz $(HANDINFILES)
 
 full: all mountain.png
 	./linesize > linesize.txt
